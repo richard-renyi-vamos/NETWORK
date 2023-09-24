@@ -1,0 +1,51 @@
+import psutil
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import tkinter as tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+# Initialize Tkinter
+root = tk.Tk()
+root.title("Network Bandwidth Usage")
+
+# Create a figure for the Matplotlib plot
+fig, ax = plt.subplots()
+ax.set_xlim(0, 60)  # Display the last 60 seconds of network activity
+ax.set_ylim(0, 1000)  # Adjust the y-axis limit as needed
+
+# Create a line for the plot
+line, = ax.plot([], [], lw=2)
+
+# Initialize the prev_bytes_sent as a global variable
+prev_bytes_sent = 0
+
+# Function to update the plot data
+def update(i):
+    global prev_bytes_sent  # Declare prev_bytes_sent as a global variable
+    net_io = psutil.net_io_counters()
+    bytes_sent = net_io.bytes_sent - prev_bytes_sent
+    prev_bytes_sent = net_io.bytes_sent
+    values.append(bytes_sent)
+    
+    if len(values) > 60:
+        values.pop(0)
+    
+    line.set_data(range(len(values)), values)
+    return line,
+
+# Initial values to populate the graph
+values = [0] * 60  # Initialize with zeros
+
+# Animate the plot
+ani = FuncAnimation(fig, update, blit=True, interval=1000)
+
+# Create a Tkinter canvas for the Matplotlib plot
+canvas = FigureCanvasTkAgg(fig, master=root)
+canvas.get_tk_widget().pack()
+canvas.draw()
+
+# Start the Tkinter main loop
+root.mainloop()
+
+
+# CREATED WITH THE HELP OF OPEN-AI CHAT GPT: https://chat.openai.com/chat
